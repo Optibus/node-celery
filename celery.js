@@ -23,6 +23,7 @@ function Configuration(options) {
     self.BROKER_OPTIONS = self.BROKER_OPTIONS || { url: self.BROKER_URL, heartbeat: 580 };
     self.DEFAULT_QUEUE = self.DEFAULT_QUEUE || 'celery';
     self.DEFAULT_EXCHANGE = self.DEFAULT_EXCHANGE || '';
+    self.DEFAULT_ALLOW_RECONNECT = self.DEFAULT_ALLOW_RECONNECT !== null ? true : self.DEFAULT_ALLOW_RECONNECT;
     self.DEFAULT_EXCHANGE_TYPE = self.DEFAULT_EXCHANGE_TYPE || 'direct';
     self.DEFAULT_ROUTING_KEY = self.DEFAULT_ROUTING_KEY || 'celery';
     self.RESULT_EXCHANGE = self.RESULT_EXCHANGE || 'celeryresults';
@@ -65,7 +66,7 @@ function RedisBroker(broker_url) {
     self.end = function() {
       self.redis.end();
     };
-    
+
     self.disconnect = function() {
         self.redis.end();
     };
@@ -122,7 +123,8 @@ function Client(conf) {
     if (self.conf.broker_type === 'amqp') {
       self.broker = amqp.createConnection(
         self.conf.BROKER_OPTIONS, {
-          defaultExchangeName: self.conf.DEFAULT_EXCHANGE
+          defaultExchangeName: self.conf.DEFAULT_EXCHANGE,
+          reconnect: self.DEFAULT_ALLOW_RECONNECT
       });
     } else if (self.conf.broker_type === 'redis') {
       self.broker = new RedisBroker(self.conf.BROKER_URL);
@@ -141,7 +143,8 @@ function Client(conf) {
             url: self.conf.BROKER_URL,
             heartbeat: 580
         }, {
-            defaultExchangeName: self.conf.DEFAULT_EXCHANGE
+            defaultExchangeName: self.conf.DEFAULT_EXCHANGE,
+            reconnect: self.DEFAULT_ALLOW_RECONNECT
         });
     } else if (self.conf.backend_type === 'redis') {
         var purl = url.parse(self.conf.RESULT_BACKEND),
