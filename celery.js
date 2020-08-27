@@ -316,7 +316,8 @@ function Task(client, name, options, exchange) {
         var msg = createMessage(self.name, args, kwargs, options, id);
         var pubOptions = {
             'contentType': 'application/json',
-            'contentEncoding': 'utf-8'
+            'contentEncoding': 'utf-8',
+            'deliveryMode': 2
         };
 
         if (exchange) {
